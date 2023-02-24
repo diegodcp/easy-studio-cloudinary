@@ -1,6 +1,20 @@
+body{
+    background: rgb(2,0,36)!important;
+    background: linear-gradient(180deg, rgba(2,0,36,1) 4%, rgba(9,9,121,1) 74%, rgba(66,66,152,1) 100%)!important;
+}
 .danger-snackbar{
     background-color: red;
     color: #fff;
     box-shadow: 2px 2px 20px #000000e6;
     text-align: center;
+}
+h3, span, .title{
+    font-family: 'Montserrat';
+}
+.curved-background__curved {
+    background: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 100%);
+    border-bottom-left-radius: 50% 40%;
+    border-bottom-right-radius: 50% 40%;
+    height: 70%;
+    width: 100%;
 }

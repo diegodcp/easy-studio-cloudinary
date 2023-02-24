@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 
 import { Cloudinary, CloudinaryImage } from '@cloudinary/url-gen';
 //Cloudinary actions
-import { fill, pad, scale } from "@cloudinary/url-gen/actions/resize";
+import { fill, pad, scale, fit } from "@cloudinary/url-gen/actions/resize";
 import { source } from "@cloudinary/url-gen/actions/overlay";
 import { byAngle } from "@cloudinary/url-gen/actions/rotate"
 import { artisticFilter, Effect } from "@cloudinary/url-gen/actions/effect";
@@ -32,6 +32,7 @@ export class EditionComponent implements OnInit {
   cloudinaryImg!: CloudinaryImage;
   
   filter: string = '';
+  resizeType: string = 'fit';
   
   originHeight:number = 0;
   originWidth:number = 0;
@@ -140,8 +141,13 @@ export class EditionComponent implements OnInit {
     //pad maintain the aspect ratio
     //scale not maintain the ratio, .aspectRatio("1.0")
     //.gravity(focusOn(FocusOn.face())))
+
+    if(this.resizeType=='fit')
+      this.cloudinaryImg.resize(fit().width(this.width).height(this.height));
+    else if(this.resizeType=='fill')
+      this.cloudinaryImg.resize(fill().width(this.width).height(this.height));
+
     this.cloudinaryImg
-    .resize(pad().height(this.height).width(this.width))
     .roundCorners(byRadius(this.radius))
     .overlay(
       source(
@@ -222,20 +228,26 @@ export class EditionComponent implements OnInit {
 
   cropImage(cropType: string):void {
     switch(cropType) { 
-      case 'rectangle': { 
-        this.height = this.originHeight/2;
+      case 'rectangle': {
+        this.resizeType = 'fill';
+        this.height = Math.round(this.originHeight/3);
         this.width = this.originWidth;
         break; 
       } 
       case 'square': {
+        this.resizeType = 'fit';
         this.height = (this.originHeight>this.originWidth) ? this.originHeight : this.originWidth;
         this.width = (this.originHeight>this.originWidth) ? this.originHeight : this.originWidth;
         break; 
       } 
-      case 'portrait': { 
+      case 'portrait': {
+        this.resizeType = 'fill';
+        this.height = this.originHeight;
+        this.width = Math.round(this.originWidth/2);
         break; 
       }
       case 'face': { 
+        this.resizeType = 'fit';
         break; 
       } 
       default: { 

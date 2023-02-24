@@ -1,11 +1,13 @@
-<div class="w-full flex justify-between p-2">
+<div id="header" class="w-full flex justify-between p-2">
     <div>
         <button mat-button [matMenuTriggerFor]="menu">File</button>
         <mat-menu #menu="matMenu">
             <button routerLink="/" mat-menu-item>Exit</button>
         </mat-menu>
     </div>
-    <div>
-        Be premium
+    <div class="flex items-center cursor-pointer" title="I know, you liked it!&#013;Try PRO-STUDIO for premium users."
+        (click)="openPremiumDialog()">
+        <mat-icon class="text-amber-300">verified</mat-icon>
+        <h3 style="margin:0;">PRO-STUDIO</h3>
     </div>
 </div>

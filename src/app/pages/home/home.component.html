@@ -1,27 +1,37 @@
-<div class="w-full flex justify-between p-2">
-  <div>
-    <h1>EASY-STUDIO</h1>
+<div id="header" class="w-full flex justify-between p-2 curved-background">
+  <div class="mt-3 ml-5">
+    <span class="text-2xl font-medium">EASY-STUDIO</span>
   </div>
-  <div>
-    <h3>Try PRO-STUDIO with premium</h3>
+  <div class="flex items-center cursor-pointer" title="I know, you liked it!&#013;Try PRO-STUDIO for premium users."
+    (click)="openPremiumDialog()">
+    <mat-icon class="text-amber-300">verified</mat-icon>
+    <h3 style="margin:0;">PRO-STUDIO</h3>
   </div>
 </div>
 
-<div class="flex flex-col items-center">
-  <span class="my-5 text-xl">
-    Let's start to edit a image, find out what else you can do.
-  </span>
-  <div class="w-96">
-    <ngx-dropzone (change)="onSelect($event)">
-      <ngx-dropzone-label>Drop an image, or click and select one!</ngx-dropzone-label>
-      <ngx-dropzone-image-preview ngProjectAs="ngx-dropzone-preview" *ngFor="let f of files" [file]="f"
-          [removable]="true" (removed)="onRemove(f)" class="!m-auto">
-          <ngx-dropzone-label>{{ f.name }} ({{ f.type }})</ngx-dropzone-label>
-      </ngx-dropzone-image-preview>
-    </ngx-dropzone>
-    <mat-progress-bar *ngIf="loadImage" mode="indeterminate"></mat-progress-bar>
+<div class="flex justify-center curved-background__curved pt-10">
+  <div class="flex flex-col text-2xl w-6/12 px-20">
+    <span class="text-3xl mb-7 title">Powerful <strong>FREE</strong> tool for photo edition</span>
+    <span class="text-xl my-1">Resize, crop, put filters, effects and more!</span>
+    <span class="text-xl my-1">Create <strong>high quality</strong> beautiful designs right in your browser.</span>
+    <span class="text-xl mb-1 mt-3">You can create amazing profile pictures, banners or images</span>
+    <span class="text-xl my-1">for social medias with <strong>on-click</strong>.</span>
   </div>
-  <div class="m-5">
-    <button mat-raised-button color="primary" (click)="onUpload()">START</button>
-  </div>
+  <div class="flex flex-col w-6/12 items-center">
+    <span class="mb-5 text-xl">
+      Quick and easy photo editor.
+    </span>
+    <div class="">
+      <ngx-dropzone (change)="onSelect($event)" [maxFileSize]="5000000" accept="image/jpeg,image/jpg,image/png">
+        <ngx-dropzone-label class="px-1">Drop an image, or click and select one!</ngx-dropzone-label>
+        <ngx-dropzone-image-preview ngProjectAs="ngx-dropzone-preview" *ngFor="let f of files" [file]="f"
+            [removable]="true" (removed)="onRemove(f)" class="!m-auto">
+            <ngx-dropzone-label></ngx-dropzone-label>
+        </ngx-dropzone-image-preview>
+      </ngx-dropzone>
+      <mat-progress-bar *ngIf="loadImage" mode="indeterminate"></mat-progress-bar>
+    </div>
+    <div class="m-5">
+      <button mat-raised-button color="primary" (click)="onUpload()">Start design!</button>
+    </div>
 </div>

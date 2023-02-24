@@ -7,6 +7,7 @@ import { HomeComponent } from './pages/home/home.component';
 import { HeaderComponent } from './components/header/header.component';
 import { EditionComponent } from './components/edition/edition.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 
 import { ImagePipe } from "./pipes/image.pipe";
 
@@ -20,8 +21,10 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon'; 
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule } from '@angular/material/dialog';
 
-import { CloudinaryModule } from '@cloudinary/ng'; 
+import { CloudinaryModule } from '@cloudinary/ng';
+import { DialogComponent } from './pages/home/dialog/dialog.component'; 
 
 
 @NgModule({
@@ -30,7 +33,8 @@ import { CloudinaryModule } from '@cloudinary/ng';
     HomeComponent,
     HeaderComponent,
     EditionComponent,
-    ImagePipe
+    ImagePipe,
+    DialogComponent
   ],
   imports: [
     BrowserModule,
@@ -45,7 +49,9 @@ import { CloudinaryModule } from '@cloudinary/ng';
     MatButtonToggleModule,
     MatIconModule,
     MatProgressBarModule,
-    MatMenuModule
+    MatMenuModule,
+    MatDialogModule,
+    LazyLoadImageModule
   ],
   providers: [],
   bootstrap: [AppComponent]

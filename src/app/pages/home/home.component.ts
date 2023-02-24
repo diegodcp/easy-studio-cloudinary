@@ -1,13 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UploadService } from '../../services/upload.service';
 import { Router } from '@angular/router';
+import { DialogComponent } from './dialog/dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
-  providers: [UploadService]
+  providers: [UploadService],
+  encapsulation: ViewEncapsulation.None
 })
 export class HomeComponent implements OnInit {
   files: File[] = [];
@@ -16,7 +19,8 @@ export class HomeComponent implements OnInit {
   constructor(
     private snackBar: MatSnackBar,
     private UploadServ: UploadService,
-    private router: Router
+    private router: Router,
+    public dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -58,6 +62,10 @@ export class HomeComponent implements OnInit {
         this.loadImage = false;
       }
     });
+  }
+
+  openPremiumDialog() {
+    this.dialog.open(DialogComponent);
   }
 
 }
