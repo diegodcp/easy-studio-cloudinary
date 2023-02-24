@@ -1,0 +1,6 @@
+.danger-snackbar{
+    background-color: red;
+    color: #fff;
+    box-shadow: 2px 2px 20px #000000e6;
+    text-align: center;
+}

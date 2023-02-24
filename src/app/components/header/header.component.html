@@ -1,0 +1,11 @@
+<div class="w-full flex justify-between p-2">
+    <div>
+        <button mat-button [matMenuTriggerFor]="menu">File</button>
+        <mat-menu #menu="matMenu">
+            <button routerLink="/" mat-menu-item>Exit</button>
+        </mat-menu>
+    </div>
+    <div>
+        Be premium
+    </div>
+</div>

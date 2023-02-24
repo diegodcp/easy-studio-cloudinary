@@ -1,0 +1,27 @@
+<div class="w-full flex justify-between p-2">
+  <div>
+    <h1>EASY-STUDIO</h1>
+  </div>
+  <div>
+    <h3>Try PRO-STUDIO with premium</h3>
+  </div>
+</div>
+
+<div class="flex flex-col items-center">
+  <span class="my-5 text-xl">
+    Let's start to edit a image, find out what else you can do.
+  </span>
+  <div class="w-96">
+    <ngx-dropzone (change)="onSelect($event)">
+      <ngx-dropzone-label>Drop an image, or click and select one!</ngx-dropzone-label>
+      <ngx-dropzone-image-preview ngProjectAs="ngx-dropzone-preview" *ngFor="let f of files" [file]="f"
+          [removable]="true" (removed)="onRemove(f)" class="!m-auto">
+          <ngx-dropzone-label>{{ f.name }} ({{ f.type }})</ngx-dropzone-label>
+      </ngx-dropzone-image-preview>
+    </ngx-dropzone>
+    <mat-progress-bar *ngIf="loadImage" mode="indeterminate"></mat-progress-bar>
+  </div>
+  <div class="m-5">
+    <button mat-raised-button color="primary" (click)="onUpload()">START</button>
+  </div>
+</div>

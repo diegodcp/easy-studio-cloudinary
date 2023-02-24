@@ -1,0 +1,72 @@
+<div class="min-h-screen max-h-screen flex flex-col">
+  <app-header></app-header>
+
+  <div class="flex flex-row relative flex-grow overflow-auto">
+    <div class="sidebar flex flex-col w-3/12">
+      
+      <strong>Resize:</strong>
+      <div class="flex flex-wrap w-full justify-between items-center px-1">
+        <span class="text-xs">Width: {{width}}</span>
+        <mat-slider min="1" max="1024" step="1" showTickMarks discrete
+            (input)="resize($event, 'width')" [value]="width" color="primary" class="grow">
+            <input matSliderThumb>
+        </mat-slider>
+      </div>
+      <div class="flex flex-wrap w-full justify-between items-center px-1">
+        <span class="text-xs">Height: {{height}}</span>
+        <mat-slider min="1" max="1024" step="1" showTickMarks discrete
+            (input)="resize($event, 'height')" [value]="height" color="primary" class="grow">
+            <input matSliderThumb>
+        </mat-slider>
+      </div>
+      <div class="flex flex-wrap w-full justify-between items-center px-1">
+        <span class="text-xs">Opacity: {{opacity}}</span>
+        <mat-slider min="0" max="100" step="1" showTickMarks discrete
+            (input)="changeOpacity($event)" [value]="opacity" color="primary" class="grow">
+            <input matSliderThumb>
+        </mat-slider>
+      </div>
+
+      <button id="step1" mat-raised-button color="primary">Primary</button>
+
+    </div>
+    <div class="w-9/12 flex flex-col">
+        <div class="topbar flex justify-center">
+            <mat-button-toggle-group #group="matButtonToggleGroup">
+                <mat-button-toggle value="square" (click)="cropImage('square')" aria-label="Square" title="Square">
+                  <mat-icon>crop_square</mat-icon>
+                </mat-button-toggle>
+                <mat-button-toggle value="portrait" (click)="cropImage('portrait')" aria-label="Portrait" title="Portrait">
+                  <mat-icon>crop_portrait</mat-icon>
+                </mat-button-toggle>
+                <mat-button-toggle value="rectangle" (click)="cropImage('rectangle')" aria-label="Rectangle" title="Rectangle">
+                  <mat-icon>crop_16_9</mat-icon>
+                </mat-button-toggle>
+                <mat-button-toggle value="face" (click)="cropImage('face')" aria-label="Face" title="Face focus">
+                  <mat-icon>account_box</mat-icon>
+                </mat-button-toggle>
+              </mat-button-toggle-group>
+        </div>
+
+        <div class="flex justify-center">
+          <a id="step2" (click)="downloadImage(cloudinaryImg.toURL())">Download File</a>
+        </div>
+        
+        <div class="content flex items-center justify-center h-full overflow-auto">
+            <advanced-image [cldImg]="cloudinaryImg"></advanced-image>
+        </div>
+        
+        <div class="downbar flex overflow-x-auto space-x-6 overflow-y-hidden items-center justify-between py-1 px-2">
+          <span>Filters</span>
+          <advanced-image [cldImg]="publicId | getImg: 'none'" (click)="callFiltersImg('none')" class="filters flex-shrink-0"></advanced-image>
+          <advanced-image [cldImg]="publicId | getImg: 'incognito'" (click)="callFiltersImg('incognito')" class="filters flex-shrink-0"></advanced-image>
+          <advanced-image [cldImg]="publicId | getImg: 'quartz'" (click)="callFiltersImg('quartz')" class="filters flex-shrink-0"></advanced-image>
+          <advanced-image [cldImg]="publicId | getImg: 'primavera'" (click)="callFiltersImg('primavera')" class="filters flex-shrink-0"></advanced-image>
+          <advanced-image [cldImg]="publicId | getImg: 'sepia'" (click)="callFiltersImg('sepia')" class="filters flex-shrink-0"></advanced-image>
+          <advanced-image [cldImg]="publicId | getImg: 'outline'" (click)="callFiltersImg('outline')" class="filters flex-shrink-0"></advanced-image>
+          <advanced-image [cldImg]="publicId | getImg: 'cartoonify'" (click)="callFiltersImg('cartoonify')" class="filters flex-shrink-0"></advanced-image>
+          <advanced-image [cldImg]="publicId | getImg: 'vignette'" (click)="callFiltersImg('vignette')" class="filters flex-shrink-0"></advanced-image>
+      </div>
+    </div>
+  </div>
+</div>
