@@ -9,5 +9,9 @@ body {
     margin: 0; 
     font-family: Roboto, "Helvetica Neue", sans-serif;
     color: #FFFFFF;
-    background-color: #292C31;
+    background-color: #323232;
+}
+img, video {
+    max-width: 100%;
+    max-height: 100%;
 }

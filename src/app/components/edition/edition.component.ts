@@ -6,10 +6,10 @@ import { environment } from '../../../environments/environment';
 
 import { Cloudinary, CloudinaryImage } from '@cloudinary/url-gen';
 //Cloudinary actions
-import { fill, pad, scale, fit } from "@cloudinary/url-gen/actions/resize";
+import { fill, pad, scale, fit, crop } from "@cloudinary/url-gen/actions/resize";
 import { source } from "@cloudinary/url-gen/actions/overlay";
 import { byAngle } from "@cloudinary/url-gen/actions/rotate"
-import { artisticFilter, Effect } from "@cloudinary/url-gen/actions/effect";
+import { artisticFilter, Effect, pixelate } from "@cloudinary/url-gen/actions/effect";
 import { byRadius } from "@cloudinary/url-gen/actions/roundCorners";
 //Cloudinary values
 import { text } from "@cloudinary/url-gen/qualifiers/source";
@@ -17,7 +17,7 @@ import { Position } from "@cloudinary/url-gen/qualifiers/position";
 import { TextStyle } from "@cloudinary/url-gen/qualifiers/textStyle";
 import { compass, focusOn } from "@cloudinary/url-gen/qualifiers/gravity";
 import { FocusOn } from "@cloudinary/url-gen/qualifiers/focusOn";
-import { opacity } from '@cloudinary/url-gen/actions/adjust';
+import { opacity, saturation } from '@cloudinary/url-gen/actions/adjust';
 
 const IntroJs = require('../../../../node_modules/intro.js/intro.js');
 
@@ -30,10 +30,12 @@ export class EditionComponent implements OnInit {
   cld: any;
   publicId:string = '';
   cloudinaryImg!: CloudinaryImage;
+  loading:boolean = false;
   
   filter: string = '';
   resizeType: string = 'fit';
-  
+  customText:string = '';
+
   originHeight:number = 0;
   originWidth:number = 0;
   height:number = 0;
@@ -41,7 +43,10 @@ export class EditionComponent implements OnInit {
   opacity:number = 100;
   radius:number = 0;
   rotation:number = 0;
+  saturation:number = 0;
+  pixelate:number = 0;
 
+  effects:string[] = ['incognito', 'quartz', 'primavera', 'sepia', 'outline', 'cartoonify', 'vignette'];
 
   constructor(
     private route: ActivatedRoute,
@@ -102,19 +107,6 @@ export class EditionComponent implements OnInit {
     }
   }
 
-  downloadImage(url: string) {
-    console.log(url);
-    this.imageServ.getImage(url).subscribe(
-      (res: any) => {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(res);
-        a.download = url;
-        document.body.appendChild(a);
-        a.click();
-      }
-    );
-  }
-
   resize(event: any, option:string) {
     if(option=='width')
       this.width = event.value;
@@ -128,60 +120,74 @@ export class EditionComponent implements OnInit {
     this.callCustomImg();
   }
 
+  changePixel(event: any) {
+    this.pixelate = event.value;
+    this.callCustomImg();
+  }
+
+  rotate(event: any) {
+    this.rotation = event.value;
+    this.callCustomImg();
+  }
+
+  changeSaturation(event: any) {
+    this.saturation = event.value;
+    this.callCustomImg();
+  }
+
   callCustomImg():void  {
+    this.loading = true;
     this.cloudinaryImg = this.cld.image(this.publicId);
-
-    const {sepia, outline, cartoonify, vignette} = Effect;
-    let effect:any;// = cartoonify();
-    let customText = 'This is my picture';
-    let textColor = 'white';
-
-    //resize fill / crop
-    //usar fill para el banner  
-    //pad maintain the aspect ratio
+    
     //scale not maintain the ratio, .aspectRatio("1.0")
-    //.gravity(focusOn(FocusOn.face())))
 
     if(this.resizeType=='fit')
       this.cloudinaryImg.resize(fit().width(this.width).height(this.height));
     else if(this.resizeType=='fill')
       this.cloudinaryImg.resize(fill().width(this.width).height(this.height));
+    else if(this.resizeType=='crop')
+      this.cloudinaryImg.resize(crop().width(this.width).height(this.height));
+
+    if(this.pixelate > 0)
+      this.cloudinaryImg.effect(pixelate().squareSize(this.pixelate));
+      
+    if(this.saturation != 0)
+      this.cloudinaryImg.adjust(saturation().level(this.saturation));
 
     this.cloudinaryImg
-    .roundCorners(byRadius(this.radius))
-    .overlay(
-      source(
-        text(customText, new TextStyle('arial',18))
-        .textColor(textColor)
-      )
-    )
-    .adjust(opacity(this.opacity))
-    .backgroundColor('#373a3d')
-    .rotate(byAngle(this.rotation));
-
-    if(effect)
-      this.cloudinaryImg.effect(effect);
+      .roundCorners(byRadius(this.radius))
+      .adjust(opacity(this.opacity))    
+      .backgroundColor('#373a3d')
+      .rotate(byAngle(this.rotation));
 
     //.position(new Position().gravity(compass('north')).offsetY(20)))
-    //.adjust(saturation(50))
     //.adjust(hue(-20))
-
-    //.effect(pixelate().squareSize(20));
-
+    
     //.border(solid(5, "red")); put a frame, border
 
-    // .effect(cartoonify())
     // .roundCorners(max())
     // .effect(outline().mode(outer()).width(100).color('lightblue'))
     // .backgroundColor('lightblue')
-    // .resize(scale().height(300));
 
-    // text('Love', new TextStyle('Cookie',40)
-    // .fontWeight('bold'))
-    // .textColor('#f08')
-    // .transformation(new Transformation()
-    // .rotate(byAngle(20)))
+    this.addText(this.cloudinaryImg);
     this.addFilters(this.cloudinaryImg);
+
+    this.loading = false;
+    this.imageServ.setImgUrl(this.cloudinaryImg.toURL());
+  }
+
+  addText(img: CloudinaryImage) {
+    let textColor = 'white';
+    if(this.customText) {
+      // text('Love', new TextStyle('Cookie',40)
+      // .fontWeight('bold'))
+      img.overlay(
+        source(
+          text(this.customText, new TextStyle('arial',24))
+          .textColor(textColor)
+        )
+      );
+    }
   }
 
   addFilters(img: CloudinaryImage) {
@@ -248,6 +254,7 @@ export class EditionComponent implements OnInit {
       }
       case 'face': { 
         this.resizeType = 'fit';
+        //.gravity(focusOn(FocusOn.face())))
         break; 
       } 
       default: { 
@@ -255,6 +262,11 @@ export class EditionComponent implements OnInit {
       }
      }
      this.callCustomImg();
+  }
+
+  setCustomText(event: any):void {
+    this.customText = event.target.value;
+    this.callCustomImg();
   }
 
 }

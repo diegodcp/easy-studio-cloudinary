@@ -22,6 +22,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 import { CloudinaryModule } from '@cloudinary/ng';
 import { DialogComponent } from './pages/home/dialog/dialog.component'; 
@@ -51,7 +53,9 @@ import { DialogComponent } from './pages/home/dialog/dialog.component';
     MatProgressBarModule,
     MatMenuModule,
     MatDialogModule,
-    LazyLoadImageModule
+    LazyLoadImageModule,
+    MatFormFieldModule,
+    MatInputModule
   ],
   providers: [],
   bootstrap: [AppComponent]

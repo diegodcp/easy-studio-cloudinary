@@ -1,13 +1,12 @@
-<div id="header" class="w-full flex justify-between p-2">
-    <div>
+<div id="header" class="w-full flex justify-between">
+    <div class="mx-3">
         <button mat-button [matMenuTriggerFor]="menu">File</button>
-        <mat-menu #menu="matMenu">
+        <mat-menu #menu="matMenu" [hasBackdrop]="false">
+            <button mat-menu-item>Settings</button>
             <button routerLink="/" mat-menu-item>Exit</button>
         </mat-menu>
     </div>
-    <div class="flex items-center cursor-pointer" title="I know, you liked it!&#013;Try PRO-STUDIO for premium users."
-        (click)="openPremiumDialog()">
-        <mat-icon class="text-amber-300">verified</mat-icon>
-        <h3 style="margin:0;">PRO-STUDIO</h3>
+    <div class="flex items-center">
+        <button class="bg-blue-500 text-white py-2 px-5 my-1 mx-3 rounded-xl" (click)="downloadImage()">Download image</button>
     </div>
 </div>

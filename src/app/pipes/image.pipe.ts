@@ -24,7 +24,7 @@ export class ImagePipe implements PipeTransform {
       }
     });
 
-    let filterCloudImg = cld.image(publicId).resize(fill().width(80).height(80));
+    let filterCloudImg = cld.image(publicId).resize(fill().width(60).height(80));
     
     const {sepia, outline, cartoonify, vignette} = Effect;
     switch(filter) { 

@@ -7,6 +7,7 @@ import { catchError, map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ImageService {
+  imgUrl:string = '';
 
   constructor(
     private http: HttpClient
@@ -21,5 +22,12 @@ export class ImageService {
     );
   }
 
+  setImgUrl(imgUrl: string) {
+    this.imgUrl = imgUrl;
+  }
+
+  getImgUrl(): string{
+    return this.imgUrl;
+  }
 
 }

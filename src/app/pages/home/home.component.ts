@@ -4,6 +4,7 @@ import { UploadService } from '../../services/upload.service';
 import { Router } from '@angular/router';
 import { DialogComponent } from './dialog/dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -41,7 +42,7 @@ export class HomeComponent implements OnInit {
       this.snackBar.open("Select a image, please.", "", {
         horizontalPosition: 'center',
         verticalPosition: 'top',
-        duration: 5000,
+        duration: 3000,
         panelClass: ['danger-snackbar']
       });
       this.loadImage = false;
@@ -52,14 +53,20 @@ export class HomeComponent implements OnInit {
     const data = new FormData();
 
     data.append('file', file_data);
-    data.append('upload_preset', 'angular_cloudinary');
-    data.append('cloud_name', 'dsemrnx2w');
+    data.append('upload_preset', environment.CLOUDINARY_PRESET);
+    data.append('cloud_name', environment.CLOUDINARY_CLOUD_NAME);
 
     this.UploadServ.uploadImage(data).subscribe( response => {
       if(response){
-        // console.log(response);
         this.router.navigate(['/edition', { publicId: response.public_id, imageWidth: response.width, imageHeight: response.height }]);
         this.loadImage = false;
+      } else {
+        this.snackBar.open("An error occurred, try again later.", "", {
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          duration: 3000,
+          panelClass: ['danger-snackbar']
+        });
       }
     });
   }
