@@ -25,13 +25,12 @@ export class HeaderComponent implements OnInit {
 
   downloadImage() {
     let imgUrl = this.imageServ.getImgUrl();
-    console.log(imgUrl);
 
-    this.imageServ.getImage(imgUrl).subscribe(
+    this.imageServ.getImageByUrl(imgUrl).subscribe(
       (res: any) => {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(res);
-        a.download = 'easy-studio.png';
+        a.download = 'easy_studio';
         document.body.appendChild(a);
         a.click();
       }

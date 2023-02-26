@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ImageService } from 'src/app/services/image.service';
 import { StorageService } from 'src/app/services/storage.service';
-import { environment } from '../../../environments/environment';
 
-import { Cloudinary, CloudinaryImage } from '@cloudinary/url-gen';
+import { CloudinaryImage, Transformation } from '@cloudinary/url-gen';
 //Cloudinary actions
 import { fill, pad, scale, fit, crop } from "@cloudinary/url-gen/actions/resize";
 import { source } from "@cloudinary/url-gen/actions/overlay";
@@ -15,9 +14,10 @@ import { byRadius } from "@cloudinary/url-gen/actions/roundCorners";
 import { text } from "@cloudinary/url-gen/qualifiers/source";
 import { Position } from "@cloudinary/url-gen/qualifiers/position";
 import { TextStyle } from "@cloudinary/url-gen/qualifiers/textStyle";
-import { compass, focusOn } from "@cloudinary/url-gen/qualifiers/gravity";
-import { FocusOn } from "@cloudinary/url-gen/qualifiers/focusOn";
-import { opacity, saturation } from '@cloudinary/url-gen/actions/adjust';
+import { autoGravity, compass, focusOn } from "@cloudinary/url-gen/qualifiers/gravity";
+import { face, FocusOn } from "@cloudinary/url-gen/qualifiers/focusOn";
+import { autoBrightness, autoContrast, brightness, contrast, opacity, saturation } from '@cloudinary/url-gen/actions/adjust';
+import { delay } from 'rxjs';
 
 const IntroJs = require('../../../../node_modules/intro.js/intro.js');
 
@@ -27,14 +27,15 @@ const IntroJs = require('../../../../node_modules/intro.js/intro.js');
   styleUrls: ['./edition.component.css']
 })
 export class EditionComponent implements OnInit {
-  cld: any;
   publicId:string = '';
   cloudinaryImg!: CloudinaryImage;
   loading:boolean = false;
+  showWand:boolean = false;
   
   filter: string = '';
   resizeType: string = 'fit';
   customText:string = '';
+  customTextPosition:string = 'center';
 
   originHeight:number = 0;
   originWidth:number = 0;
@@ -45,6 +46,8 @@ export class EditionComponent implements OnInit {
   rotation:number = 0;
   saturation:number = 0;
   pixelate:number = 0;
+  brightness:number = 0;
+  contrast:number = 0;
 
   effects:string[] = ['incognito', 'quartz', 'primavera', 'sepia', 'outline', 'cartoonify', 'vignette'];
 
@@ -56,7 +59,7 @@ export class EditionComponent implements OnInit {
 
   ngOnInit(): void {
     this.getParams();
-    this.cloudinaryInit();
+    this.cloudinaryImg = this.imageServ.cloudinaryInit(this.publicId);
     this.executeIntro();
   }
 
@@ -65,23 +68,8 @@ export class EditionComponent implements OnInit {
     this.originHeight = +(this.route.snapshot.paramMap.get('imageHeight') || 1024);
     this.originWidth = +(this.route.snapshot.paramMap.get('imageWidth') || 1024);
 
-    console.log(this.originHeight);
-    console.log(this.originWidth);
-    
     this.height = this.originHeight = (this.originHeight > 1024) ? 1024 : this.originHeight;
     this.width = this.originWidth = (this.originWidth > 1024) ? 1024 : this.originWidth;
-    
-    console.log(this.originHeight);
-    console.log(this.originWidth);
-  }
-
-  cloudinaryInit() {
-    this.cld = new Cloudinary({
-      cloud: {
-        cloudName:  environment.CLOUDINARY_CLOUD_NAME
-      }
-    });
-    this.callCustomImg();
   }
 
   executeIntro() {
@@ -92,19 +80,81 @@ export class EditionComponent implements OnInit {
       IntroJs().setOptions({
         steps:  [{
                     element: '#step1',
-                    intro: 'Step one description',
+                    intro: 'Select the layout you prefer, for example \'Portrait\' for your social media.',
+                    title: 'Step 1',
+                    position: 'bottom'
+                  },
+                  {
+                    element: '#step2',
+                    intro: 'Resize, change the opacity, the saturation, add overlay text and much more!'+
+                     ' But if you want we can do all for you, just click on the \'Magic button\' to get the best format and quality.',
+                    title: 'Step 2',
+                    position: 'bottom'
+                  },
+                  {
+                    element: '#step3',
+                    intro: 'After changes click the button to make them take effect.',
+                    title: 'Step 3',
                     position: 'right'
-                    },
-                    {
-                      element: '#step2',
-                      intro: 'Step one description',
-                      position: 'right'
-                    }],
-                    showBullets: false,
-              showButtons: true,
-              exitOnOverlayClick: false
+                  },
+                  {
+                    element: '#step4',
+                    intro: 'In this section you have several options to apply amazing filters.',
+                    title: 'Step 3',
+                    position: 'top'
+                  },
+                  {
+                    element: '#step5',
+                    intro: 'Once your image is beautiful and perfect, click the \'Download image\' button at the right-top.',
+                    title: 'Step 4',
+                    position: 'right'
+                  }],
+                  showBullets: false,
+                  showButtons: true,
+                  exitOnOverlayClick: false
       }).start();
     }
+  }
+
+  callCustomImg():void  {
+    this.loading = true;
+    console.log(this.loading);
+    
+    let image = this.imageServ.cloudinaryInit(this.publicId);
+
+    image.adjust(opacity(this.opacity))
+      .rotate(byAngle(this.rotation))
+      .backgroundColor('#373a3d')
+      .roundCorners(byRadius(this.radius));
+
+      if(this.brightness>0)
+        image.adjust(brightness().level(this.brightness));
+      if(this.contrast>0)
+        image.adjust(contrast().level(this.contrast));
+
+    if(this.pixelate > 0)
+      image.effect(pixelate().squareSize(this.pixelate));
+    if(this.saturation != 0)
+      image.adjust(saturation().level(this.saturation));
+
+    //.aspectRatio("1.0")
+    if(this.resizeType=='fit')
+      image.resize(fit().width(this.width).height(this.height));
+    else if(this.resizeType=='fill')
+      image.resize(fill().gravity(autoGravity()).width(this.width).height(this.height));
+    else if(this.resizeType=='crop')
+      image.resize(crop().gravity(focusOn(face())).width(this.width).height(this.height));
+    
+    this.addText(image);
+
+    //.adjust(hue(-20))
+    //.border(solid(5, "red")); put a frame, border
+
+    this.cloudinaryImg = this.addFilters(image);
+
+    console.log(this.cloudinaryImg);
+    this.imageServ.setImgUrl(this.cloudinaryImg.toURL());
+    this.loading = false;
   }
 
   resize(event: any, option:string) {
@@ -112,86 +162,62 @@ export class EditionComponent implements OnInit {
       this.width = event.value;
     else if(option=='height')
       this.height = event.value;
-    this.callCustomImg();
   }
 
   changeOpacity(event: any) {
     this.opacity = event.value;
-    this.callCustomImg();
   }
 
   changePixel(event: any) {
     this.pixelate = event.value;
-    this.callCustomImg();
   }
 
   rotate(event: any) {
     this.rotation = event.value;
-    this.callCustomImg();
   }
 
   changeSaturation(event: any) {
     this.saturation = event.value;
-    this.callCustomImg();
   }
 
-  callCustomImg():void  {
-    this.loading = true;
-    this.cloudinaryImg = this.cld.image(this.publicId);
-    
-    //scale not maintain the ratio, .aspectRatio("1.0")
-
-    if(this.resizeType=='fit')
-      this.cloudinaryImg.resize(fit().width(this.width).height(this.height));
-    else if(this.resizeType=='fill')
-      this.cloudinaryImg.resize(fill().width(this.width).height(this.height));
-    else if(this.resizeType=='crop')
-      this.cloudinaryImg.resize(crop().width(this.width).height(this.height));
-
-    if(this.pixelate > 0)
-      this.cloudinaryImg.effect(pixelate().squareSize(this.pixelate));
-      
-    if(this.saturation != 0)
-      this.cloudinaryImg.adjust(saturation().level(this.saturation));
-
-    this.cloudinaryImg
-      .roundCorners(byRadius(this.radius))
-      .adjust(opacity(this.opacity))    
-      .backgroundColor('#373a3d')
-      .rotate(byAngle(this.rotation));
-
-    //.position(new Position().gravity(compass('north')).offsetY(20)))
-    //.adjust(hue(-20))
-    
-    //.border(solid(5, "red")); put a frame, border
-
-    // .roundCorners(max())
-    // .effect(outline().mode(outer()).width(100).color('lightblue'))
-    // .backgroundColor('lightblue')
-
-    this.addText(this.cloudinaryImg);
-    this.addFilters(this.cloudinaryImg);
-
-    this.loading = false;
-    this.imageServ.setImgUrl(this.cloudinaryImg.toURL());
+  setCustomText(event: any) {
+    this.customText = event.target.value;
+  }
+  setCustomTextPosition(position: string) {
+    this.customTextPosition = position;
   }
 
-  addText(img: CloudinaryImage) {
+  round(event: any) {
+    this.radius = event.value;
+  }
+  
+  changeBrightness(event: any) {
+    this.brightness = event.value;
+  }
+  
+  changeContrast(event: any) {
+    this.contrast = event.value;
+  }
+
+  addText(image: CloudinaryImage) {
     let textColor = 'white';
     if(this.customText) {
-      // text('Love', new TextStyle('Cookie',40)
-      // .fontWeight('bold'))
-      img.overlay(
+      image.overlay(
         source(
-          text(this.customText, new TextStyle('arial',24))
+          text(this.customText, 
+            new TextStyle('arial',80)
+            .fontWeight('bold'))
           .textColor(textColor)
+          .transformation(new Transformation())
         )
+        .position(new Position().gravity(compass(this.customTextPosition)).offsetY(20))
       );
     }
   }
 
-  addFilters(img: CloudinaryImage) {
+  addFilters(img: CloudinaryImage): CloudinaryImage {
     const {sepia, outline, cartoonify, vignette} = Effect;
+    
     
     switch(this.filter) { 
       case 'sepia': { 
@@ -199,6 +225,7 @@ export class EditionComponent implements OnInit {
         break; 
       } 
       case 'outline': {
+        // .effect(outline().mode(outer()).width(100).color('lightblue'))
         img.effect(outline());
         break; 
       } 
@@ -225,6 +252,7 @@ export class EditionComponent implements OnInit {
           break; 
       }
      }
+     return img;
   }
 
   callFiltersImg(filter:string):void  {
@@ -233,6 +261,7 @@ export class EditionComponent implements OnInit {
   }
 
   cropImage(cropType: string):void {
+
     switch(cropType) { 
       case 'rectangle': {
         this.resizeType = 'fill';
@@ -253,8 +282,9 @@ export class EditionComponent implements OnInit {
         break; 
       }
       case 'face': { 
-        this.resizeType = 'fit';
-        //.gravity(focusOn(FocusOn.face())))
+        this.resizeType = 'crop';
+        this.height = Math.round(this.originHeight/2);
+        this.width = Math.round(this.originWidth/2);
         break; 
       } 
       default: { 
@@ -264,9 +294,22 @@ export class EditionComponent implements OnInit {
      this.callCustomImg();
   }
 
-  setCustomText(event: any):void {
-    this.customText = event.target.value;
-    this.callCustomImg();
+  magicOptimize(): void{
+    this.loading = true;
+    this.showWand = true;
+    
+    (async () => { 
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      this.showWand = false;
+      this.cloudinaryImg = this.imageServ.cloudinaryInit(this.publicId);
+      this.cloudinaryImg.format('auto')
+        .quality('auto')
+        .adjust(autoContrast())
+        .adjust(autoBrightness());
+    })();
+
+    this.loading = false;
   }
+
 
 }

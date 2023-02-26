@@ -4,7 +4,8 @@
   <div class="flex flex-row relative flex-grow overflow-auto">
     
     <div class="sidebar flex flex-col w-3/12 p-2">
-      <div class="flex flex-wrap w-full justify-between items-center px-1">
+      
+      <div id="step2" class="flex flex-wrap w-full justify-between items-center px-1">
         <span class="text-xs w-full font-semibold">Resize:</span>
         <span class="text-xs ml-2">Width: {{width}}</span>
         <mat-slider min="1" max="1024" step="1" showTickMarks discrete
@@ -16,6 +17,20 @@
         <span class="text-xs ml-2">Height: {{height}}</span>
         <mat-slider min="1" max="1024" step="1" showTickMarks discrete
             (input)="resize($event, 'height')" [value]="height" color="primary" class="grow">
+            <input matSliderThumb>
+        </mat-slider>
+      </div>
+      <div class="flex flex-wrap w-full justify-between items-center px-1">
+        <span class="text-xs font-semibold">Brightness: <span class="font-normal">{{brightness}}</span></span>
+        <mat-slider min="0" max="100" step="1" showTickMarks discrete
+            (input)="changeBrightness($event)" [value]="brightness" color="primary" class="grow">
+            <input matSliderThumb>
+        </mat-slider>
+      </div>
+      <div class="flex flex-wrap w-full justify-between items-center px-1">
+        <span class="text-xs font-semibold">Contrast: <span class="font-normal">{{contrast}}</span></span>
+        <mat-slider min="0" max="100" step="1" showTickMarks discrete
+            (input)="changeContrast($event)" [value]="contrast" color="primary" class="grow">
             <input matSliderThumb>
         </mat-slider>
       </div>
@@ -47,40 +62,63 @@
             <input matSliderThumb>
         </mat-slider>
       </div>
+      <div class="flex flex-col flex-wrap w-full justify-between items-center px-1">
+        <span class="text-xs font-semibold">Round: <span class="font-normal">{{radius}}</span></span>
+        <mat-slider min="0" max="100" step="1" showTickMarks discrete
+            (input)="round($event)" [value]="radius" color="primary" class="grow w-full">
+            <input matSliderThumb>
+        </mat-slider>
+      </div>
 
       <div class="flex flex-col flex-wrap w-full justify-between items-center px-1">
-        <mat-form-field appearance="outline" class="w-full">
+        <span class="text-xs w-full font-semibold">Add text overlay</span>
+        <mat-form-field appearance="outline" class="w-full fieldText my-0 py-0">
           <mat-label>Text</mat-label>
-          <input matInput placeholder="Your custom text" (focusout)="setCustomText($event)">
+          <input matInput placeholder="Your custom text" (focusout)="setCustomText($event)" class="my-0 py-0">
         </mat-form-field>
+        <mat-button-toggle-group name="align" value="center" aria-label="Text align" class="w-full">
+          <mat-button-toggle value="north" (click)="setCustomTextPosition('north')" class="w-2/6">Top</mat-button-toggle>
+          <mat-button-toggle value="center" (click)="setCustomTextPosition('center')" class="w-2/6">Middle</mat-button-toggle>
+          <mat-button-toggle value="south" (click)="setCustomTextPosition('south')" class="w-2/6">Bottom</mat-button-toggle>
+        </mat-button-toggle-group>        
+      </div>
+
+      <div id="step3" class="flex flex-col flex-wrap w-full justify-between items-center px-1">
+        <button (click)="callCustomImg()" class="bg-blue-500 text-white py-2 px-5 my-1 mx-3 rounded-xl">Apply</button>
       </div>
     </div>
 
     <div class="w-9/12 flex flex-col">
-        <div class="topbar flex justify-center p-1">
-            <mat-button-toggle-group #group="matButtonToggleGroup">
-                <mat-button-toggle value="square" (click)="cropImage('square')" aria-label="Square" title="Square">
-                  <mat-icon>crop_square</mat-icon>
-                </mat-button-toggle>
-                <mat-button-toggle value="portrait" (click)="cropImage('portrait')" aria-label="Portrait" title="Portrait">
-                  <mat-icon>crop_portrait</mat-icon>
-                </mat-button-toggle>
-                <mat-button-toggle value="rectangle" (click)="cropImage('rectangle')" aria-label="Banner" title="Banner">
-                  <mat-icon>crop_16_9</mat-icon>
-                </mat-button-toggle>
-                <mat-button-toggle value="face" (click)="cropImage('face')" aria-label="Face" title="Face focus">
-                  <mat-icon>account_box</mat-icon>
-                </mat-button-toggle>
-              </mat-button-toggle-group>
+        <div class="topbar flex items-center justify-between p-1">
+            <button (click)="magicOptimize()" class="shadow-md w-12" title="Magic optimization (Format & Quality)">
+              <mat-icon style="font-size: 2rem;">auto_fix_normal</mat-icon>
+            </button>
+            <mat-button-toggle-group id="step1" #group="matButtonToggleGroup">
+              <mat-button-toggle value="square" (click)="cropImage('square')" aria-label="Square" title="Square">
+                <mat-icon>crop_square</mat-icon>
+              </mat-button-toggle>
+              <mat-button-toggle value="portrait" (click)="cropImage('portrait')" aria-label="Portrait" title="Portrait">
+                <mat-icon>crop_portrait</mat-icon>
+              </mat-button-toggle>
+              <mat-button-toggle value="rectangle" (click)="cropImage('rectangle')" aria-label="Landscape" title="Landscape">
+                <mat-icon>crop_16_9</mat-icon>
+              </mat-button-toggle>
+              <mat-button-toggle value="face" (click)="cropImage('face')" aria-label="Face" title="Face focus">
+                <mat-icon>account_box</mat-icon>
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+            <span></span>
         </div>
 
         <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
         <div class="content flex items-center justify-center h-full overflow-auto">
-          <advanced-image [cldImg]="cloudinaryImg" loading="eager" 
-              class="!flex w-full h-full items-center justify-center overflow-hidden"></advanced-image>
+          <!-- <advanced-image [cldImg]="cloudinaryImg" loading="eager" 
+              class="!flex w-full h-full items-center justify-center overflow-hidden"></advanced-image> -->
+          <app-wand *ngIf="showWand"></app-wand>
+          <img id="step5" [src]="cloudinaryImg.toURL()" class="p-1">
         </div>
         
-        <div class="downbar flex overflow-x-auto overflow-y-hidden space-x-6 items-center py-3 px-2">
+        <div id="step4" class="downbar flex overflow-x-auto overflow-y-hidden space-x-6 items-center py-3 px-2">
           <advanced-image [cldImg]="publicId | getImg: 'none'" (click)="callFiltersImg('none')" class="!flex filters justify-center flex-shrink-0" title="Original"></advanced-image>
           <div class="divider"></div>
           <advanced-image *ngFor="let effect of effects" [cldImg]="publicId | getImg: effect" (click)="callFiltersImg(effect)" 

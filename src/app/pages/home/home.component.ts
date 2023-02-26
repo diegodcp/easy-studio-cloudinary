@@ -16,6 +16,7 @@ import { environment } from '../../../environments/environment';
 export class HomeComponent implements OnInit {
   files: File[] = [];
   loadImage: boolean = false;
+  cloudName:string = '';
 
   constructor(
     private snackBar: MatSnackBar,
@@ -26,6 +27,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadImage = false;
+    this.cloudName = environment.CLOUDINARY_CLOUD_NAME;
   }
 
   onSelect(event: any) {
@@ -54,7 +56,7 @@ export class HomeComponent implements OnInit {
 
     data.append('file', file_data);
     data.append('upload_preset', environment.CLOUDINARY_PRESET);
-    data.append('cloud_name', environment.CLOUDINARY_CLOUD_NAME);
+    data.append('cloud_name', this.cloudName);
 
     this.UploadServ.uploadImage(data).subscribe( response => {
       if(response){

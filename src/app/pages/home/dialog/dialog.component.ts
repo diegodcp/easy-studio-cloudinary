@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-dialog',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class DialogComponent implements OnInit {
   defaultImage = '';
-  image = 'https://res.cloudinary.com/dsemrnx2w/image/upload/v1677243469/mini_studio/happy_ifzoyk.gif';
+  image = 'https://res.cloudinary.com/'+environment.CLOUDINARY_CLOUD_NAME+'/image/upload/v1677243469/mini_studio/happy_ifzoyk.gif';
 
   constructor() { }
 

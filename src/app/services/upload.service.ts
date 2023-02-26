@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class UploadService {
 
   uploadImage(data: FormData): Observable<any> {
     return this.http
-    .post<any>('https://api.cloudinary.com/v1_1/dsemrnx2w/image/upload', data)
+    .post<any>(environment.CLOUDINARY_API, data)
     .pipe(
       map( (response: any) => {
         return response;

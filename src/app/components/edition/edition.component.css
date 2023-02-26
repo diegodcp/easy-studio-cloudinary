@@ -28,3 +28,18 @@
     width: 1rem;
     margin-left: 0px!important;
 }
+::ng-deep .mat-form-field-wrapper{
+    padding: 0!important;
+    margin-bottom: 0!important;
+}
+::ng-deep .introjs-tooltip{
+    color: #1C1F22;
+}
+::ng-deep .introjs-tooltip-header, ::ng-deep .introjs-nextbutton{
+    color: #fff;
+    background-color: #3B82F6;
+    text-align: center;
+}
+::ng-deep .introjs-tooltiptext{
+    line-height: 1.5rem;
+}

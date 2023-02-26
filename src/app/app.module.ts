@@ -26,7 +26,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 import { CloudinaryModule } from '@cloudinary/ng';
-import { DialogComponent } from './pages/home/dialog/dialog.component'; 
+import { DialogComponent } from './pages/home/dialog/dialog.component';
+import { WandComponent } from './components/shared/wand/wand.component'; 
 
 
 @NgModule({
@@ -36,7 +37,8 @@ import { DialogComponent } from './pages/home/dialog/dialog.component';
     HeaderComponent,
     EditionComponent,
     ImagePipe,
-    DialogComponent
+    DialogComponent,
+    WandComponent
   ],
   imports: [
     BrowserModule,
