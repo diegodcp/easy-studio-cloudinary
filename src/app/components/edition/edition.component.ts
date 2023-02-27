@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ImageService } from 'src/app/services/image.service';
 import { StorageService } from 'src/app/services/storage.service';
+import { IntroJsUtil } from 'src/app/utils/introjs';
 
 import { CloudinaryImage, Transformation } from '@cloudinary/url-gen';
 //Cloudinary actions
@@ -10,16 +11,14 @@ import { source } from "@cloudinary/url-gen/actions/overlay";
 import { byAngle } from "@cloudinary/url-gen/actions/rotate"
 import { artisticFilter, Effect, pixelate } from "@cloudinary/url-gen/actions/effect";
 import { byRadius } from "@cloudinary/url-gen/actions/roundCorners";
+import { autoBrightness, autoContrast, brightness, contrast, opacity, saturation } from '@cloudinary/url-gen/actions/adjust';
 //Cloudinary values
 import { text } from "@cloudinary/url-gen/qualifiers/source";
 import { Position } from "@cloudinary/url-gen/qualifiers/position";
 import { TextStyle } from "@cloudinary/url-gen/qualifiers/textStyle";
 import { autoGravity, compass, focusOn } from "@cloudinary/url-gen/qualifiers/gravity";
 import { face, FocusOn } from "@cloudinary/url-gen/qualifiers/focusOn";
-import { autoBrightness, autoContrast, brightness, contrast, opacity, saturation } from '@cloudinary/url-gen/actions/adjust';
-import { delay } from 'rxjs';
 
-const IntroJs = require('../../../../node_modules/intro.js/intro.js');
 
 @Component({
   selector: 'app-edition',
@@ -29,11 +28,15 @@ const IntroJs = require('../../../../node_modules/intro.js/intro.js');
 export class EditionComponent implements OnInit {
   publicId:string = '';
   cloudinaryImg!: CloudinaryImage;
+  originalCloudinaryImg!: CloudinaryImage;
   loading:boolean = false;
   showWand:boolean = false;
+  resizeError:boolean = false;
+  showOriginalImage:boolean=false;
   
   filter: string = '';
   resizeType: string = 'fit';
+  aspectRatio: string = '1.1';
   customText:string = '';
   customTextPosition:string = 'center';
 
@@ -54,12 +57,14 @@ export class EditionComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private imageServ: ImageService,
-    private storageServ: StorageService
+    private storageServ: StorageService,
+    private introJS: IntroJsUtil
   ) { }
 
   ngOnInit(): void {
     this.getParams();
     this.cloudinaryImg = this.imageServ.cloudinaryInit(this.publicId);
+    this.originalCloudinaryImg = this.cloudinaryImg;
     this.executeIntro();
   }
 
@@ -74,52 +79,14 @@ export class EditionComponent implements OnInit {
 
   executeIntro() {
     let introStorage = JSON.parse(this.storageServ.getLocalStorage('intro')) || null;
-
     if(!introStorage) {
       this.storageServ.saveLocalStorage('intro', true);
-      IntroJs().setOptions({
-        steps:  [{
-                    element: '#step1',
-                    intro: 'Select the layout you prefer, for example \'Portrait\' for your social media.',
-                    title: 'Step 1',
-                    position: 'bottom'
-                  },
-                  {
-                    element: '#step2',
-                    intro: 'Resize, change the opacity, the saturation, add overlay text and much more!'+
-                     ' But if you want we can do all for you, just click on the \'Magic button\' to get the best format and quality.',
-                    title: 'Step 2',
-                    position: 'bottom'
-                  },
-                  {
-                    element: '#step3',
-                    intro: 'After changes click the button to make them take effect.',
-                    title: 'Step 3',
-                    position: 'right'
-                  },
-                  {
-                    element: '#step4',
-                    intro: 'In this section you have several options to apply amazing filters.',
-                    title: 'Step 3',
-                    position: 'top'
-                  },
-                  {
-                    element: '#step5',
-                    intro: 'Once your image is beautiful and perfect, click the \'Download image\' button at the right-top.',
-                    title: 'Step 4',
-                    position: 'right'
-                  }],
-                  showBullets: false,
-                  showButtons: true,
-                  exitOnOverlayClick: false
-      }).start();
+      this.introJS.initIntroJS();
     }
   }
 
   callCustomImg():void  {
     this.loading = true;
-    console.log(this.loading);
-    
     let image = this.imageServ.cloudinaryInit(this.publicId);
 
     image.adjust(opacity(this.opacity))
@@ -127,23 +94,22 @@ export class EditionComponent implements OnInit {
       .backgroundColor('#373a3d')
       .roundCorners(byRadius(this.radius));
 
-      if(this.brightness>0)
-        image.adjust(brightness().level(this.brightness));
-      if(this.contrast>0)
-        image.adjust(contrast().level(this.contrast));
+    if(this.brightness>0)
+      image.adjust(brightness().level(this.brightness));
+    if(this.contrast>0)
+      image.adjust(contrast().level(this.contrast));
 
     if(this.pixelate > 0)
       image.effect(pixelate().squareSize(this.pixelate));
     if(this.saturation != 0)
       image.adjust(saturation().level(this.saturation));
 
-    //.aspectRatio("1.0")
     if(this.resizeType=='fit')
-      image.resize(fit().width(this.width).height(this.height));
+      image.resize(fit().width(this.width).height(this.height).aspectRatio(this.aspectRatio));
     else if(this.resizeType=='fill')
-      image.resize(fill().gravity(autoGravity()).width(this.width).height(this.height));
+      image.resize(fill().gravity(autoGravity()).width(this.width).height(this.height).aspectRatio(this.aspectRatio));
     else if(this.resizeType=='crop')
-      image.resize(crop().gravity(focusOn(face())).width(this.width).height(this.height));
+      image.resize(crop().gravity(focusOn(face())).width(this.width).height(this.height).aspectRatio(this.aspectRatio));
     
     this.addText(image);
 
@@ -151,17 +117,23 @@ export class EditionComponent implements OnInit {
     //.border(solid(5, "red")); put a frame, border
 
     this.cloudinaryImg = this.addFilters(image);
-
-    console.log(this.cloudinaryImg);
     this.imageServ.setImgUrl(this.cloudinaryImg.toURL());
+  }
+  
+  setImageLoaded(){
     this.loading = false;
   }
 
   resize(event: any, option:string) {
-    if(option=='width')
-      this.width = event.value;
-    else if(option=='height')
-      this.height = event.value;
+    if(event.target.value >= 1 && event.target.value <= 1024){
+      this.resizeError = false;
+      if(option=='width')
+        this.width = event.target.value;
+      else if(option=='height')
+        this.height = event.target.value;
+    } else {
+      this.resizeError = true;
+    }
   }
 
   changeOpacity(event: any) {
@@ -201,11 +173,13 @@ export class EditionComponent implements OnInit {
 
   addText(image: CloudinaryImage) {
     let textColor = 'white';
+    let textSize = (this.width<300) ? 20 : ((this.width<500) ? 40 : (this.width<800) ? 60 : 80);
+
     if(this.customText) {
       image.overlay(
         source(
           text(this.customText, 
-            new TextStyle('arial',80)
+            new TextStyle('arial',textSize)
             .fontWeight('bold'))
           .textColor(textColor)
           .transformation(new Transformation())
@@ -217,8 +191,6 @@ export class EditionComponent implements OnInit {
 
   addFilters(img: CloudinaryImage): CloudinaryImage {
     const {sepia, outline, cartoonify, vignette} = Effect;
-    
-    
     switch(this.filter) { 
       case 'sepia': { 
         img.effect(sepia());
@@ -261,30 +233,33 @@ export class EditionComponent implements OnInit {
   }
 
   cropImage(cropType: string):void {
-
     switch(cropType) { 
       case 'rectangle': {
         this.resizeType = 'fill';
-        this.height = Math.round(this.originHeight/3);
+        this.height = Math.round(this.originHeight/2);
         this.width = this.originWidth;
+        this.aspectRatio = '16.9';
         break; 
       } 
       case 'square': {
         this.resizeType = 'fit';
         this.height = (this.originHeight>this.originWidth) ? this.originHeight : this.originWidth;
         this.width = (this.originHeight>this.originWidth) ? this.originHeight : this.originWidth;
+        this.aspectRatio = '1.1';
         break; 
       } 
       case 'portrait': {
         this.resizeType = 'fill';
         this.height = this.originHeight;
-        this.width = Math.round(this.originWidth/2);
+        this.width = Math.round(this.originWidth/1.5);
+        this.aspectRatio = '4.3';
         break; 
       }
       case 'face': { 
         this.resizeType = 'crop';
-        this.height = Math.round(this.originHeight/2);
-        this.width = Math.round(this.originWidth/2);
+        this.height = this.originHeight;
+        this.width = this.originWidth;
+        this.aspectRatio = '1.1';
         break; 
       } 
       default: { 
@@ -309,6 +284,10 @@ export class EditionComponent implements OnInit {
     })();
 
     this.loading = false;
+  }
+
+  loadOriginalImage(press: boolean) {
+    this.showOriginalImage = press;
   }
 
 

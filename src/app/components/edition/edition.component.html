@@ -5,7 +5,8 @@
     
     <div class="sidebar flex flex-col w-3/12 p-2">
       
-      <div id="step2" class="flex flex-wrap w-full justify-between items-center px-1">
+      <h2 class="place-self-center">Image configuration:</h2>
+      <!-- <div id="step2" class="flex flex-wrap w-full justify-between items-center px-1">
         <span class="text-xs w-full font-semibold">Resize:</span>
         <span class="text-xs ml-2">Width: {{width}}</span>
         <mat-slider min="1" max="1024" step="1" showTickMarks discrete
@@ -19,7 +20,8 @@
             (input)="resize($event, 'height')" [value]="height" color="primary" class="grow">
             <input matSliderThumb>
         </mat-slider>
-      </div>
+      </div> -->
+      
       <div class="flex flex-wrap w-full justify-between items-center px-1">
         <span class="text-xs font-semibold">Brightness: <span class="font-normal">{{brightness}}</span></span>
         <mat-slider min="0" max="100" step="1" showTickMarks discrete
@@ -71,7 +73,7 @@
       </div>
 
       <div class="flex flex-col flex-wrap w-full justify-between items-center px-1">
-        <span class="text-xs w-full font-semibold">Add text overlay</span>
+        <span class="text-xs w-full font-semibold">Text overlays</span>
         <mat-form-field appearance="outline" class="w-full fieldText my-0 py-0">
           <mat-label>Text</mat-label>
           <input matInput placeholder="Your custom text" (focusout)="setCustomText($event)" class="my-0 py-0">
@@ -83,39 +85,62 @@
         </mat-button-toggle-group>        
       </div>
 
-      <div id="step3" class="flex flex-col flex-wrap w-full justify-between items-center px-1">
-        <button (click)="callCustomImg()" class="bg-blue-500 text-white py-2 px-5 my-1 mx-3 rounded-xl">Apply</button>
+      <div id="step3" class="flex flex-col flex-wrap w-full mt-5 justify-between items-center">
+        <button (click)="callCustomImg()" class="w-full bg-blue-500 text-white py-2 px-5 rounded-xl">Apply</button>
       </div>
     </div>
 
     <div class="w-9/12 flex flex-col">
         <div class="topbar flex items-center justify-between p-1">
-            <button (click)="magicOptimize()" class="shadow-md w-12" title="Magic optimization (Format & Quality)">
-              <mat-icon style="font-size: 2rem;">auto_fix_normal</mat-icon>
-            </button>
+            <div class="flex flex-col justify-center items-center">
+              <span class="text-xs">Magic</span>
+              <button (click)="magicOptimize()" class="shadow-md rounded-md w-12" title="Magic optimization (Format & Quality)">
+                <mat-icon style="font-size: 2rem;">auto_fix_normal</mat-icon>
+              </button>
+            </div>
             <mat-button-toggle-group id="step1" #group="matButtonToggleGroup">
-              <mat-button-toggle value="square" (click)="cropImage('square')" aria-label="Square" title="Square">
-                <mat-icon>crop_square</mat-icon>
-              </mat-button-toggle>
-              <mat-button-toggle value="portrait" (click)="cropImage('portrait')" aria-label="Portrait" title="Portrait">
-                <mat-icon>crop_portrait</mat-icon>
-              </mat-button-toggle>
-              <mat-button-toggle value="rectangle" (click)="cropImage('rectangle')" aria-label="Landscape" title="Landscape">
-                <mat-icon>crop_16_9</mat-icon>
-              </mat-button-toggle>
-              <mat-button-toggle value="face" (click)="cropImage('face')" aria-label="Face" title="Face focus">
-                <mat-icon>account_box</mat-icon>
-              </mat-button-toggle>
+              <div class="flex flex-col justify-center items-center">
+                <mat-button-toggle value="square" (click)="cropImage('square')" aria-label="Square" title="Square">
+                  <mat-icon>crop_square</mat-icon>
+                </mat-button-toggle>
+                <span class="text-xs">1:1</span>
+              </div>
+              <div class="flex flex-col justify-center items-center">
+                <mat-button-toggle value="portrait" (click)="cropImage('portrait')" aria-label="Portrait" title="Portrait">
+                  <mat-icon>crop_portrait</mat-icon>
+                </mat-button-toggle>
+                <span class="text-xs">4:3</span>
+              </div>
+              <div class="flex flex-col justify-center items-center">
+                <mat-button-toggle value="rectangle" (click)="cropImage('rectangle')" aria-label="Landscape" title="Landscape">
+                  <mat-icon>crop_16_9</mat-icon>
+                </mat-button-toggle>
+                <span class="text-xs">16:9</span>
+              </div>
+              <div class="flex flex-col justify-center items-center">
+                <mat-button-toggle value="face" (click)="cropImage('face')" aria-label="Face" title="Face focus">
+                  <mat-icon>account_box</mat-icon>
+                </mat-button-toggle>
+                <span class="text-xs">1:1</span>
+              </div>
             </mat-button-toggle-group>
-            <span></span>
+            <div class="flex flex-col">
+              <div>
+              <span>W: </span><input type="number" (input)="resize($event, 'width')" value="{{width}}" min="1" max="1024" class="my-0 py-0 w-14 text-center border border-slate-300">
+              <span class="ml-1">H: </span><input type="number" (input)="resize($event, 'height')" value="{{height}}" min="1" max="1024" class="my-0 py-0 w-14 text-center border border-slate-300">
+              </div>
+              <span *ngIf="resizeError" class="text-red-800 text-xs">*(min size 1, max size 1024)</span>
+            </div>
         </div>
 
         <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
-        <div class="content flex items-center justify-center h-full overflow-auto">
-          <!-- <advanced-image [cldImg]="cloudinaryImg" loading="eager" 
-              class="!flex w-full h-full items-center justify-center overflow-hidden"></advanced-image> -->
-          <app-wand *ngIf="showWand"></app-wand>
-          <img id="step5" [src]="cloudinaryImg.toURL()" class="p-1">
+        <div class="content relative flex items-center justify-center h-full overflow-auto">
+            <app-wand *ngIf="showWand"></app-wand>
+            <img *ngIf="showOriginalImage" [src]="originalCloudinaryImg.toURL()" class="p-1">
+            <img id="step5" *ngIf="!showOriginalImage" [src]="cloudinaryImg.toURL()" (load)="setImageLoaded()" class="p-1">
+
+            <button (mousedown)="loadOriginalImage(true)" (mouseup)="loadOriginalImage(false)" (mouseleave)="loadOriginalImage(false)" 
+            class="absolute top-1 right-1 bg-slate-50 text-gray-500 hover:bg-slate-200 shadow-md text-sm w-16 min-w-fit mx-2 place-self-end rounded-xl">Original</button>
         </div>
         
         <div id="step4" class="downbar flex overflow-x-auto overflow-y-hidden space-x-6 items-center py-3 px-2">

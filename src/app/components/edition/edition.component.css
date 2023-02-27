@@ -28,6 +28,9 @@
     width: 1rem;
     margin-left: 0px!important;
 }
+::ng-deep .topbar .mat-button-toggle-appearance-standard .mat-button-toggle-label-content{
+    line-height: 0px;
+}
 ::ng-deep .mat-form-field-wrapper{
     padding: 0!important;
     margin-bottom: 0!important;
